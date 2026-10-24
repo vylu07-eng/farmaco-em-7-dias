@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173c35">
+<title>Farmaco em 7 Dias</title>
+<style>
+:root{--bg:#f4f6f2;--card:#fff;--ink:#172a25;--muted:#61716b;--green:#173c35;--green2:#28695a;--line:#dce5df;--gold:#f0c56a;--soft:#e8f1ec}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,#173c35,#28695a);color:white;padding:26px 18px 22px;border-radius:0 0 24px 24px}
+.wrap{max-width:900px;margin:auto;padding:0 14px}h1{font-size:28px;line-height:1.1;margin:0 0 8px}header p{margin:0;color:#e3f0e9}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.pill{background:#ffffff20;border:1px solid #ffffff35;border-radius:999px;padding:6px 10px;font-size:13px}
+nav{display:flex;gap:8px;overflow:auto;padding:14px 0;position:sticky;top:0;background:var(--bg);z-index:5}
+nav button{white-space:nowrap;border:1px solid var(--line);background:white;color:var(--ink);border-radius:999px;padding:10px 14px;font-weight:650}
+nav button.active{background:var(--green);color:white;border-color:var(--green)}
+main{padding-bottom:38px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:10px 0;box-shadow:0 3px 14px #18382b08}
+h2{font-size:21px;margin:0 0 10px}h3{font-size:16px;margin:16px 0 6px}.muted{color:var(--muted)}.small{font-size:13px}.progress{height:9px;background:#e1e9e4;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--green2);width:0;transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--soft);border-radius:12px;padding:12px}.stat strong{display:block;font-size:23px}
+.daygrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.day{border:1px solid var(--line);border-radius:15px;background:white;padding:14px;text-align:left;color:var(--ink)}.day.selected{border:2px solid var(--green2);background:#edf5f0}.day strong{display:block}.day span{font-size:13px;color:var(--muted)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #edf1ee}.check:last-child{border-bottom:0}.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--green2);flex-shrink:0}
+ul{padding-left:21px}li{margin:5px 0}.timer{font-size:34px;font-weight:750;letter-spacing:1px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,.btn{cursor:pointer;font:inherit}.primary{background:var(--green);color:white;border:0;border-radius:12px;padding:11px 15px;font-weight:650}.secondary{background:white;border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink)}.gold{background:#fff4d9;border:1px solid #f0d99c;border-radius:12px;padding:12px}
+textarea{width:100%;min-height:95px;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;resize:vertical}select{padding:10px;border:1px solid var(--line);border-radius:10px;background:white}
+.question{padding:14px 0;border-bottom:1px solid var(--line)}.question p{font-weight:650;margin:0 0 8px}.option{display:flex;gap:8px;margin:7px 0;font-weight:400}.feedback{margin-top:8px;padding:9px;border-radius:9px;background:var(--soft);display:none}.answer{display:none}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:520px){h1{font-size:25px}.daygrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.stat{padding:9px}.stat strong{font-size:20px}}
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Farmaco 7 Dias">
+\n</head>
+<body>
+<header><div class="wrap">
+<h1>Farmaco em 7 Dias</h1>
+<p>Seu plano de revisão de Farmacologia, organizado para estudar 1 hora por dia.</p>
+<div class="pills"><span class="pill">60 min por dia</span><span class="pill">7 etapas</span><span class="pill">Checklist + simulado</span><span class="pill">Funciona offline</span></div>
+</div></header>
+<div class="wrap">
+<nav id="nav">
+<button class="active" data-tab="inicio">Início</button><button data-tab="plano">Plano diário</button><button data-tab="simulado">Simulado</button><button data-tab="resumo">Revisão rápida</button><button data-tab="anotacoes">Minhas anotações</button>
+</nav>
+<main id="app"></main>
+</div>
+<footer>Material de estudo organizado a partir dos tópicos das suas folhas de revisão. Confira com o professor qualquer definição que esteja diferente do material da aula.</footer>
+<script>
+const days=[
+{title:"Fundamentos, ética e medicamentos",goal:"Entender os conceitos básicos e diferenciar tipos de medicamentos.",tasks:[
+["15 min","Revisão ativa: escreva o que lembra sobre ética, moral e medicamentos, sem olhar o material."],
+["20 min","Estude ética e moral; Lei nº 5.991/1973; definições de droga, medicamento, correlato e insumo farmacêutico."],
+["10 min","Compare farmácia e drogaria; medicamento de referência, genérico e similar."],
+["10 min","Faça as questões 1 e 2 do simulado."],
+["5 min","Corrija os erros e anote 2 conceitos que costuma confundir."]],
+topics:["Ética e moral","Lei nº 5.991/1973","Droga, medicamento, correlato e insumo farmacêutico","Farmácia e drogaria","Referência, genérico e similar"],
+learn:[
+["Medicamento de referência","É o produto inovador registrado que serve de parâmetro para comparação de qualidade, eficácia e segurança."],
+["Medicamento genérico","É identificado pelo nome do princípio ativo e deve demonstrar equivalência conforme as exigências regulatórias."],
+["Medicamento similar","É associado a uma marca e possui o mesmo princípio ativo, concentração, forma farmacêutica, via e indicação do referência, conforme regras regulatórias."],
+["Ética e moral","Moral se relaciona a costumes e regras de um grupo; ética é a reflexão sobre valores e condutas."]
+]},
+{title:"Vocabulário farmacológico e normas",goal:"Fixar definições que aparecem em perguntas diretas.",tasks:[
+["15 min","Recite em voz alta as definições sem ler; depois confira."],
+["20 min","Estude farmacologia, farmacopeia, farmacodinâmica e biotransformação."],
+["10 min","Revise dose, posologia, concentração, dispensação e prescrição."],
+["10 min","Revise antimicrobiano, farmacoepidemiologia, desvio de qualidade e RDC 471/2021."],
+["5 min","Escreva uma definição curta para cada termo que errou."]],
+topics:["Farmacologia e farmacopeia","Farmacodinâmica e biotransformação","Dose, posologia e concentração","Dispensação e prescrição","Antimicrobiano, farmacoepidemiologia e desvio de qualidade","RDC nº 471/2021"],
+learn:[
+["Farmacologia","Estuda os fármacos e suas interações com os sistemas biológicos."],
+["Farmacopeia","Compêndio oficial com padrões e requisitos de qualidade para substâncias e produtos."],
+["Farmacodinâmica","Estuda os efeitos dos fármacos no organismo e seus mecanismos de ação."],
+["Biotransformação","Alteração química de substâncias no organismo, frequentemente no fígado."],
+["Dose","Quantidade administrada em uma tomada ou ocasião."],
+["Posologia","Indica dose, intervalo, via e duração do uso, conforme a prescrição."],
+["Concentração","Quantidade de substância presente em determinado volume ou massa."],
+["Dispensação","Ato de fornecer medicamento ao usuário com orientações pertinentes ao uso correto."],
+["Prescrição","Documento ou orientação formal emitida por profissional habilitado, conforme a legislação."]
+]},
+{title:"Transporte e receptores",goal:"Diferenciar transporte passivo e ativo e reconhecer receptores ionotrópicos.",tasks:[
+["15 min","Desenhe uma membrana e explique como uma substância atravessa."],
+["20 min","Estude transporte passivo, transporte ativo e ligação às proteínas plasmáticas."],
+["10 min","Revise receptores ionotrópicos e canais iônicos."],
+["10 min","Faça as questões 5 e 6 do simulado."],
+["5 min","Explique a diferença entre passivo e ativo em duas frases."]],
+topics:["Transporte passivo","Transporte ativo","Ligação às proteínas plasmáticas","Receptores ionotrópicos"],
+learn:[
+["Transporte passivo","Não exige energia celular direta e ocorre a favor do gradiente de concentração ou eletroquímico."],
+["Transporte ativo","Move substâncias com gasto de energia direto ou indireto, podendo ocorrer contra o gradiente."],
+["Proteínas plasmáticas","Alguns fármacos ligam-se a proteínas do plasma; a fração livre é a que pode distribuir-se e exercer efeitos."],
+["Receptor ionotrópico","Receptor ligado a um canal iônico, que altera rapidamente o fluxo de íons quando ativado."]
+]},
+{title:"Interações entre medicamentos",goal:"Não confundir sinergismo, potencialização e antagonismo.",tasks:[
+["15 min","Faça cartões com o nome do tipo de interação de um lado e a definição do outro."],
+["20 min","Estude sinergismo, efeito aditivo, potencialização e antagonismo."],
+["10 min","Compare antagonismo competitivo, não competitivo, reversível e irreversível."],
+["10 min","Faça as questões 7 e 8 do simulado."],
+["5 min","Revise os pares de conceitos que confundiu."]],
+topics:["Sinergismo","Sinergismo aditivo","Potencialização","Antagonismo","Antagonismo competitivo e não competitivo","Reversível e irreversível"],
+learn:[
+["Sinergismo aditivo","O efeito combinado corresponde aproximadamente à soma dos efeitos individuais."],
+["Potencialização","A combinação produz efeito maior do que o esperado pela soma dos efeitos isolados."],
+["Antagonismo","Uma substância reduz ou impede o efeito de outra."],
+["Competitivo","Substâncias competem pelo mesmo local de ligação; em muitos casos o antagonismo pode ser superado aumentando o agonista."],
+["Não competitivo","O antagonista reduz a resposta por outro mecanismo ou por ligação que não é superada simplesmente aumentando o agonista."]
+]},
+{title:"Neurônio e neurotransmissores",goal:"Identificar partes do neurônio e funções gerais dos neurotransmissores.",tasks:[
+["15 min","Desenhe um neurônio e identifique dendritos, corpo celular, axônio, mielina e sinapse."],
+["20 min","Estude acetilcolina, noradrenalina, glutamato e GABA."],
+["10 min","Explique o papel da mielina e da sinapse."],
+["10 min","Faça as questões 9 e 10 do simulado."],
+["5 min","Revise as funções dos quatro neurotransmissores."]],
+topics:["Dendritos e corpo celular","Axônio e mielina","Sinapse","Acetilcolina","Noradrenalina","Glutamato e GABA"],
+learn:[
+["Dendritos","Recebem sinais de outras células."],
+["Axônio","Conduz o impulso nervoso para outras células."],
+["Mielina","Isola partes do axônio e aumenta a velocidade de condução."],
+["Sinapse","Região de comunicação entre neurônios ou entre neurônio e célula-alvo."],
+["Acetilcolina","Neurotransmissor importante na junção neuromuscular e no sistema nervoso autônomo."],
+["Noradrenalina","Participa da sinalização do sistema nervoso simpático e de funções de alerta."],
+["Glutamato","Principal neurotransmissor excitatório do sistema nervoso central."],
+["GABA","Principal neurotransmissor inibitório do sistema nervoso central."]
+]},
+{title:"Sistema nervoso autônomo e fármacos",goal:"Separar respostas simpáticas e parassimpáticas e os tipos de receptores.",tasks:[
+["15 min","Faça uma tabela: simpático versus parassimpático."],
+["20 min","Estude receptores muscarínicos M1, M2 e M3 e receptores nicotínicos."],
+["10 min","Revise colinérgicos, agonistas muscarínicos, anticolinérgicos, anticolinesterásicos e simpatomiméticos."],
+["10 min","Faça as questões 11, 12 e 14 do simulado."],
+["5 min","Diga em voz alta a diferença entre agonista e antagonista."]],
+topics:["Simpático e parassimpático","Receptores muscarínicos M1, M2 e M3","Receptores nicotínicos","Fármacos colinérgicos","Agonistas muscarínicos","Anticolinérgicos e anticolinesterásicos","Simpatomiméticos"],
+learn:[
+["Simpático","Participa da resposta de alerta e ação, com efeitos que variam conforme o órgão."],
+["Parassimpático","Participa de funções de repouso e digestão."],
+["M1","Associado a funções neurais e a algumas funções gástricas."],
+["M2","Importante no coração, incluindo redução da frequência cardíaca."],
+["M3","Associado a secreções glandulares e contração de certos músculos lisos."],
+["Nicotínico","Receptor ionotrópico, ligado a canal iônico."],
+["Agonista","Ativa um receptor e produz resposta."],
+["Antagonista/anticolinérgico","Bloqueia ou reduz a ação de um agonista; o efeito específico depende do receptor e do fármaco."],
+["Anticolinesterásico","Inibe a enzima acetilcolinesterase, aumentando a disponibilidade de acetilcolina."],
+["Simpatomimético","Produz efeitos semelhantes aos da ativação simpática."]
+]},
+{title:"Revisão geral e simulado",goal:"Revisar os temas restantes e testar o que ficou na memória.",tasks:[
+["15 min","Revise tarjas, psicotrópicos, vias de administração e classificação de medicamentos no leite materno conforme a folha."],
+["20 min","Refaça os cartões ou definições que errou nos dias anteriores."],
+["20 min","Faça o simulado completo sem consultar as respostas."],
+["5 min","Confira a nota e selecione 3 assuntos para revisar antes da prova."]],
+topics:["Tarjas dos medicamentos","Psicotrópicos","Passagem de medicamentos para o leite materno","Vias de administração","Revisão dos erros"],
+learn:[
+["Tarjas","As tarjas ajudam a comunicar exigências e riscos de uso conforme a classificação regulatória. Estude as cores e significados exatamente como aparecem no material da aula."],
+["Psicotrópicos","Atuam no sistema nervoso central; riscos e efeitos dependem da substância e da classe."],
+["Vias de administração","Exemplos: oral, sublingual, intravenosa e intramuscular. A escolha depende do medicamento e da situação clínica."],
+["Leite materno","A passagem depende de fatores como propriedades do fármaco, concentração no sangue materno e características do leite. Memorize a classificação específica apresentada na folha de revisão."]
+]}
+];
+const questions=[
+{q:"Qual alternativa descreve melhor o medicamento de referência?",o:["É sempre vendido sem marca.","É o produto inovador usado como parâmetro regulatório de comparação.","É qualquer medicamento manipulado.","Não precisa de registro."],a:1,e:"O medicamento de referência é o produto inovador que serve como parâmetro conforme as exigências regulatórias."},
+{q:"Sobre ética e moral, marque a sequência mais adequada: I. Moral envolve costumes e regras de um grupo. II. Ética reflete sobre valores e condutas. III. Os termos têm sempre exatamente o mesmo significado.",o:["V, V, F","F, V, V","V, F, V","F, F, V"],a:0,e:"A terceira afirmação é falsa porque os termos são relacionados, mas não idênticos."},
+{q:"Relacione: 1 farmacodinâmica; 2 dose; 3 biotransformação; 4 posologia. A quantidade administrada é...",o:["1","2","3","4"],a:1,e:"Dose é a quantidade administrada; posologia é o esquema de uso."},
+{q:"O que é dispensação?",o:["Somente fabricar o medicamento.","Fornecer o medicamento com orientações pertinentes ao uso correto.","Somente escrever uma receita.","Medir a pressão arterial."],a:1,e:"Dispensar envolve fornecer o medicamento e orientar sobre seu uso, dentro das atribuições profissionais."},
+{q:"Qual característica corresponde ao transporte passivo?",o:["Sempre gasta ATP diretamente.","Ocorre contra o gradiente em todos os casos.","Não exige energia celular direta e ocorre a favor do gradiente.","Só acontece em neurônios."],a:2,e:"O transporte passivo não exige energia direta e ocorre a favor do gradiente."},
+{q:"Um receptor ionotrópico é...",o:["Um receptor associado a canal iônico.","Uma proteína plasmática de transporte.","Uma enzima digestiva.","Um tipo de medicamento genérico."],a:0,e:"Receptores ionotrópicos regulam canais iônicos e produzem respostas rápidas."},
+{q:"A diferença mais comum entre efeito aditivo e potencialização é:",o:["Aditivo soma os efeitos; potencialização supera o efeito esperado pela soma.","São sempre sinônimos.","Potencialização sempre bloqueia o receptor.","Aditivo só acontece com vitaminas."],a:0,e:"A potencialização produz efeito maior do que o esperado pela soma dos efeitos isolados."},
+{q:"Antagonismo farmacológico é quando uma substância...",o:["Aumenta sempre a absorção de outra.","Reduz ou impede o efeito de outra.","É idêntica a outra substância.","Não interage com receptores."],a:1,e:"Antagonistas reduzem ou impedem a resposta produzida por agonistas."},
+{q:"Qual parte do neurônio conduz o impulso em direção a outras células?",o:["Dendrito, exclusivamente.","Axônio.","Mielina, sozinha.","Núcleo do sangue."],a:1,e:"O axônio conduz o impulso nervoso para outras células."},
+{q:"Qual neurotransmissor é o principal inibitório no sistema nervoso central?",o:["Glutamato.","GABA.","Noradrenalina.","Acetilcolina em todos os locais."],a:1,e:"O GABA é o principal neurotransmissor inibitório do sistema nervoso central."},
+{q:"Associe o receptor muscarínico M2 ao local/função mais característico:",o:["Coração, incluindo redução da frequência cardíaca.","Contração voluntária do músculo esquelético apenas.","Produção de mielina.","Transporte passivo de fármacos."],a:0,e:"M2 é importante no coração e pode reduzir a frequência cardíaca."},
+{q:"Qual é a diferença geral entre agonista e antagonista?",o:["Agonista ativa o receptor; antagonista bloqueia ou reduz a ação de um agonista.","Ambos sempre ativam o receptor da mesma forma.","Antagonista é sempre mais potente.","Agonista é uma via de administração."],a:0,e:"Agonistas ativam receptores; antagonistas reduzem ou impedem a ativação por agonistas."},
+{q:"Qual alternativa apresenta apenas vias de administração?",o:["Oral, sublingual, intravenosa e intramuscular.","Dose, concentração, posologia e prescrição.","M1, M2, M3 e GABA.","Farmácia, drogaria, ética e moral."],a:0,e:"Oral, sublingual, intravenosa e intramuscular são vias de administração."},
+{q:"O sistema nervoso simpático está geralmente associado a:",o:["Resposta de alerta e ação.","Apenas digestão durante repouso.","Produção de medicamentos.","Transporte de proteínas no plasma."],a:0,e:"O simpático participa da resposta de alerta e ação, embora o efeito varie conforme o órgão."},
+{q:"Psicotrópicos são substâncias que atuam principalmente:",o:["No sistema nervoso central.","Apenas na pele.","Somente no estômago.","Exclusivamente no sangue, sem afetar o sistema nervoso."],a:0,e:"Psicotrópicos atuam no sistema nervoso central; os riscos dependem da substância e da classe."}
+];
+const key='farmaco7d_v1';
+let state=JSON.parse(localStorage.getItem(key)||'{}');
+if(!state.done)state.done={};if(!state.notes)state.notes='';if(!state.answers)state.answers={};
+let selectedDay=0,tab='inicio',timerInt=null,remaining=60*60;
+function save(){localStorage.setItem(key,JSON.stringify(state));}
+function doneCount(){return Object.values(state.done).filter(Boolean).length}
+function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+const root=document.getElementById('app');
+if(tab==='inicio')root.innerHTML=home();
+if(tab==='plano')root.innerHTML=plan();
+if(tab==='simulado')root.innerHTML=quiz();
+if(tab==='resumo')root.innerHTML=review();
+if(tab==='anotacoes')root.innerHTML=notes();
+}
+function home(){let pct=Math.round(doneCount()/7*100);return `<section class="card"><h2>Seu painel</h2><p class="muted">Uma hora por dia, com revisão ativa e exercícios. Marque cada dia quando terminar.</p><div class="stats"><div class="stat"><strong>${doneCount()}/7</strong><span class="small">dias concluídos</span></div><div class="stat"><strong>${pct}%</strong><span class="small">do plano</span></div><div class="stat"><strong>60 min</strong><span class="small">por sessão</span></div></div><div style="margin-top:15px" class="progress"><span style="width:${pct}%"></span></div></section><section class="card"><h2>Escolha o dia de estudo</h2><div class="daygrid">${days.map((d,i)=>`<button class="day ${selectedDay===i?'selected':''}" onclick="selectedDay=${i};tab='plano';render()"><strong>${state.done[i]?'✓ ':''}Dia ${i+1}: ${d.title}</strong><span>${d.goal}</span></button>`).join('')}</div></section><section class="card"><h2>Como usar a hora</h2><ul><li><b>15 minutos:</b> tente lembrar sem consultar.</li><li><b>20 minutos:</b> estude o conteúdo do dia.</li><li><b>20 minutos:</b> faça exercícios.</li><li><b>5 minutos:</b> corrija e registre os erros.</li></ul><div class="gold small">Dica: se a prova for em 4 dias, priorize os Dias 1 a 6 em blocos curtos e faça o simulado no último dia disponível. Não tente compensar tudo virando a noite.</div></section>`}
+function plan(){let d=days[selectedDay];return `<section class="card"><div class="row"><button class="secondary" onclick="selectedDay=Math.max(0,selectedDay-1);render()">← Dia anterior</button><button class="secondary" onclick="selectedDay=Math.min(6,selectedDay+1);render()">Próximo dia →</button></div><h2 style="margin-top:14px">Dia ${selectedDay+1}: ${d.title}</h2><p class="muted">${d.goal}</p><h3>Roteiro de 60 minutos</h3>${d.tasks.map((t,i)=>`<label class="check"><input type="checkbox" ${state.done['task'+selectedDay+'_'+i]?'checked':''} onchange="state.done['task'+selectedDay+'_'+i]=this.checked;save();render()"><span><b>${t[0]}</b> · ${t[1]}</span></label>`).join('')}<div class="row" style="margin-top:13px"><button class="primary" onclick="state.done[${selectedDay}]=true;save();render()">Marcar dia como concluído</button><button class="secondary" onclick="state.done[${selectedDay}]=false;save();render()">Desmarcar conclusão</button></div></section><section class="card"><h2>Conteúdo para estudar</h2><p class="muted small">Leia, feche a tela e tente explicar cada item com suas palavras.</p>${d.learn.map((x,i)=>`<details class="question"><summary><b>${x[0]}</b></summary><p>${x[1]}</p></details>`).join('')}<h3>Lista de tópicos</h3><ul>${d.topics.map(x=>`<li>${x}</li>`).join('')}</ul></section><section class="card"><h2>Temporizador de estudo</h2><p class="muted small">Use o cronômetro para fazer um bloco sem distrações.</p><div class="timer" id="timer">${fmt(remaining)}</div><div class="row"><button class="primary" onclick="startTimer()">Iniciar</button><button class="secondary" onclick="pauseTimer()">Pausar</button><button class="secondary" onclick="resetTimer()">Reiniciar</button><select id="mins" onchange="remaining=Number(this.value)*60;updateTimer()"><option value="15">15 minutos</option><option value="20">20 minutos</option><option value="5">5 minutos</option><option value="60" selected>60 minutos</option></select></div></section>`}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function updateTimer(){let el=document.getElementById('timer');if(el)el.textContent=fmt(remaining)}
+function startTimer(){if(timerInt)return;let sel=document.getElementById('mins');if(sel&&remaining===3600)remaining=Number(sel.value)*60;timerInt=setInterval(()=>{remaining=Math.max(0,remaining-1);updateTimer();if(remaining===0){pauseTimer();alert('Bloco concluído. Faça uma pausa curta.')}},1000)}
+function pauseTimer(){if(timerInt){clearInterval(timerInt);timerInt=null}}
+function resetTimer(){pauseTimer();let sel=document.getElementById('mins');remaining=sel?Number(sel.value)*60:3600;updateTimer()}
+function quiz(){return `<section class="card"><h2>Simulado de revisão</h2><p class="muted">15 questões. Responda sem consultar o resumo e depois confira seu resultado. Suas respostas ficam salvas neste aparelho.</p><div class="row"><button class="primary" onclick="gradeQuiz()">Corrigir simulado</button><button class="secondary" onclick="resetQuiz()">Limpar respostas</button></div><div id="score" class="gold" style="display:none;margin-top:12px"></div>${questions.map((q,i)=>`<div class="question"><p>${i+1}. ${q.q}</p>${q.o.map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}" ${state.answers[i]===j?'checked':''} onchange="state.answers[${i}]=${j};save()"> <span>${String.fromCharCode(65+j)}) ${o}</span></label>`).join('')}<div class="feedback" id="f${i}"></div></div>`).join('')}<button class="primary" onclick="gradeQuiz()">Corrigir simulado</button></section>`}
+function gradeQuiz(){let score=0;questions.forEach((q,i)=>{let chosen=state.answers[i];let el=document.getElementById('f'+i);el.style.display='block';if(chosen===q.a){score++;el.innerHTML='✓ Correto. '+q.e;el.style.background='#e4f4e8'}else{el.innerHTML='Resposta: '+String.fromCharCode(65+q.a)+'. '+q.e;el.style.background='#fff0e7'}});let box=document.getElementById('score');box.style.display='block';box.innerHTML=`<b>Resultado: ${score}/15 (${Math.round(score/15*100)}%)</b><br>${score>=13?'Bom resultado. Revise apenas os erros.':score>=10?'Você está no caminho. Volte aos tópicos das questões erradas.':'Releia os fundamentos e refaça o simulado depois de revisar.'}`;box.scrollIntoView({behavior:'smooth',block:'start'});}
+function resetQuiz(){state.answers={};save();render()}
+function review(){return `<section class="card"><h2>Revisão rápida</h2><p class="muted">Use como revisão final. Toque em cada termo para revelar a explicação.</p>${days.flatMap((d,i)=>d.learn.map(x=>({day:i+1,t:x[0],d:x[1]}))).map(x=>`<details class="question"><summary><span class="small muted">Dia ${x.day} · </span><b>${x.t}</b></summary><p>${x.d}</p></details>`).join('')}</section><section class="card"><h2>Assuntos da folha para conferir no material</h2><ul><li>Classificação de medicamentos quanto à passagem para o leite materno.</li><li>Tarjas e classificação de psicotrópicos.</li><li>Definições normativas específicas da RDC nº 471/2021.</li><li>Lista de definições e exemplos exatamente como foram ensinados em aula.</li></ul><p class="small muted">Esses itens podem depender da tabela ou da formulação usada pelo professor. Compare com a sua folha de revisão.</p></section>`}
+function notes(){return `<section class="card"><h2>Minhas anotações</h2><p class="muted">Registre os conceitos que confundiu, dúvidas para perguntar ao professor e o que precisa rever antes da prova.</p><textarea id="notearea" placeholder="Ex.: Confundo sinergismo aditivo com potencialização...">${escapeHtml(state.notes)}</textarea><div class="row" style="margin-top:10px"><button class="primary" onclick="state.notes=document.getElementById('notearea').value;save();alert('Anotações salvas neste aparelho.')">Salvar anotações</button><button class="secondary" onclick="state.notes='';save();render()">Apagar</button></div></section><section class="card"><h2>Checklist final antes da prova</h2>${["Consigo explicar os termos sem ler.","Diferencio genérico, similar e referência.","Sei distinguir transporte passivo e ativo.","Diferencio aditivo, potencialização e antagonismo.","Identifico partes do neurônio e neurotransmissores.","Separo simpático e parassimpático.","Revisei tarjas, vias de administração e os tópicos da folha.","Fiz o simulado e revisei meus erros."].map((x,i)=>`<label class="check"><input type="checkbox" ${state.done['final'+i]?'checked':''} onchange="state.done['final'+i]=this.checked;save()"><span>${x}</span></label>`).join('')}</section>`}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{pauseTimer();tab=b.dataset.tab;render();window.scrollTo(0,0)}));
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
+}
+</script>
+\n</body></html>
